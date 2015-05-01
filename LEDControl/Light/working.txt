@@ -1,0 +1,154 @@
+package com.example.sankar_2.light;
+
+import android.os.AsyncTask;
+import android.os.Handler;
+import android.support.v7.app.ActionBarActivity;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.SeekBar;
+import android.widget.TextView;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+
+
+public class MainActivity extends ActionBarActivity {
+
+    private Socket socket = null;
+    private String serverIpAddress = "192.168.0.101";
+    SeekBar bright;
+    TextView value;
+    TextView ipaddr;
+    String toSend;
+    Button changeIP;
+    PrintWriter out;
+    EditText newIP;
+    boolean connected;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        bright = (SeekBar) findViewById(R.id.seekBar);
+        value = (TextView) findViewById(R.id.textView);
+        ipaddr = (TextView)findViewById(R.id.IpAddr);
+        changeIP = (Button)findViewById(R.id.button);
+        newIP = (EditText)findViewById(R.id.NewIP);
+        ipaddr.setText("Server IP = "+serverIpAddress);
+        Thread ct = new Thread(new ClientThread());
+        ct.start();
+        changeIP.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                serverIpAddress = newIP.getText().toString();
+                Thread ct = new Thread(new ClientThread());
+                ct.start();
+                ipaddr.setText("Server IP = "+serverIpAddress);
+            }
+        });
+        bright.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                toSend = "value="+String.valueOf(progress);
+                value.setText(toSend);
+                Thread sending = new Thread(new Sender());
+                sending.start();
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+    }
+    public class ClientThread implements Runnable{
+        @Override
+        public void run(){
+            try {
+                if(socket!=null){
+                    socket.close();
+                    socket = null;
+                }
+                socket = new Socket(serverIpAddress, 12321);
+                connected = false;
+
+                    try {
+                        Log.d("ClientActivity", "C: Sending command.");
+                        out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket
+                                .getOutputStream())), true);
+                        // WHERE YOU ISSUE THE COMMANDS
+                        Log.d("ClientActivity", "C: Sent.");
+                    } catch (Exception e) {
+                        Log.e("ClientActivity", "S: Error", e);
+                    }
+
+
+                Log.d("ClientActivity", "C: Closed.");
+            } catch (Exception e) {
+                Log.e("ClientActivity", "C: Error", e);
+                connected = false;
+            }
+
+        }
+
+    }
+    public class Sender implements Runnable{
+        @Override
+        public void run()
+        {
+             if(out !=null) {
+                 out.write(toSend);
+                out.flush();
+             }
+        }
+    }
+
+
+
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+}
