@@ -1,0 +1,14 @@
+Protocol for Serial Communication between Arduino and a Computer for Home Automation
+
+Arduino will interface with hardware devices, which control objects like Doors, Lights, Fans, or Curtains.
+Each Contol Object will have its own class of the same name in singular with the first leter capital.
+Each class will have a unique integer corresponding to it.
+This will recieve a value from 0 to 100. Depending the object, it can have continous change or boolean, where non-zero is treated as ON.
+Each instance of the object will be uniquely identified by a 4 character string.
+
+The Arduino will recieve a string through its serial interface from a controller.
+This Control String will begin with a tilde symbol ("~").
+Then it will read the integer, corresponding to the class of the object, followed by a pipe ("|") to seperate this from the next control string.
+The pipe is followed by a 4 digit char like ("fanC"), which uniquely identifies the object to be controlled, and the pipe ("|")
+Following the pipe is the control value for the device, which is between 0 and 100.
+The entire control string is terminated by a exclamation mark ("!"), which on recieveing , the control string will be implemented.

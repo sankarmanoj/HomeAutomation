@@ -12,6 +12,8 @@ int curval;
 boolean started = true;
 void setup()
 {
+  pinMode(4,OUTPUT);
+  digitalWrite(4,HIGH);
   pinMode(B_LED,OUTPUT);
   Serial.begin(9600);
   digitalWrite(B_LED,HIGH);
@@ -48,25 +50,6 @@ void loop()
    }  
 }
   
-  digitalWrite(trigPin, LOW);  // Added this line
-  delayMicroseconds(2); // Added this line
-  digitalWrite(trigPin, HIGH);
-  //  delayMicroseconds(1000); - Removed this line
-  delayMicroseconds(10); // Added this line
-  digitalWrite(trigPin, LOW);
-  duration = pulseIn(echoPin, HIGH);
-  distance = (duration/2) / 29.1;
-
-  if ( distance < 60&&distance>3){
-    digitalWrite(13,HIGH);
-    value = (distance-4)*2.5;
-    if (value > 100)
-      value = 100;
-    if (value < 0)  
-      value = 0;  
-  
-    digitalWrite(13,LOW);
-  }
   if (Serial.available())
   {
     recv = Serial.read();
