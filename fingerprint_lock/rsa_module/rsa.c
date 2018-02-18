@@ -46,13 +46,14 @@ long long ExtEuclid(long long a, long long b)
 long long rsa_modExp(long long b, long long e, long long m)
 {
   if (b < 0 || e < 0 || m <= 0){
+    printf("Overflow occurred during exponentiation! Exiting...");
     exit(1);
   }
   b = b % m;
   if(e == 0) return 1;
   if(e == 1) return b;
   if( e % 2 == 0){
-    return ( rsa_modExp(b * b % m, e/2, m) % m );
+    return ( rsa_modExp((b * b) % m, e/2, m) % m );
   }
   if( e % 2 == 1){
     return ( b * rsa_modExp(b, (e-1), m) % m );
@@ -156,7 +157,7 @@ long long *rsa_encrypt(const char *message, const unsigned long message_size,
   }
   long long i = 0;
   for(i=0; i < message_size; i++){
-    encrypted[i] = rsa_modExp(message[i], pub->exponent, pub->modulus);
+    encrypted[i] = rsa_modExp((long long)message[i], pub->exponent, pub->modulus);
   }
   return encrypted;
 }
@@ -201,7 +202,20 @@ int main() {
     struct public_key_class pub;
     struct private_key_class priv;
     rsa_gen_keys(&pub, &priv, "./primes.txt");
-    //printf("Public Key: %lld:%lld", pub->modulus, pub->exponent);
+    char *string_to_encode = "hello, my name is nemo.";
+    int message_length = strlen(string_to_encode);
+    printf("\nLength of string is: %d\n", message_length);
+    printf("\nEncrypting message: '%s'\n", string_to_encode);
+    long long *encoded_message = rsa_encrypt(string_to_encode, message_length, &pub);
+    if (encoded_message == NULL) {
+        printf("Encoded message is NULL!");
+    }
+    printf("Encoding complete!\n");
+    char *decoded_message = rsa_decrypt(encoded_message, 8*message_length, &priv);
+    
+    printf("\n Decoded Message: '%s'", decoded_message);
+    free(encoded_message);
+    free(decoded_message);
     return 0;
     
 }
