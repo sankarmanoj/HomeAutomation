@@ -1,0 +1,3 @@
+[submodule "fingerprint_lock/rsa_module/RSA-Library"]
+	path = fingerprint_lock/rsa_module/RSA-Library
+	url = git@github.com:andrewkiluk/RSA-Library.git
